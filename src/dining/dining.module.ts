@@ -6,6 +6,7 @@ import { DiningService } from './service/dining.service';
 import { DiningRepository } from './repository/dining.repository';
 import { DiningMapper } from './repository/dining.mapper';
 import { SlackModule } from '../slack/slack.module';
+import { DiningController } from './dining.controller';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { SlackModule } from '../slack/slack.module';
     }),
     SlackModule,
   ],
+  controllers: [DiningController],
   providers: [DiningCronService, DiningService, DiningRepository, DiningMapper],
   exports: [DiningCronService, DiningService],
 })

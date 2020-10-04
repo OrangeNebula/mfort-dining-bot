@@ -10,13 +10,11 @@ export class DiningCronService {
   constructor(
     private service: DiningService,
     private repository: DiningRepository,
-  ) {
-    console.log('init?');
-  }
+  ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_30_SECONDS)
   handleTest() {
-    this.service.createDining();
+    // this.service.createDining();
   }
 
   @Cron('0 0 17 * * 1-5')

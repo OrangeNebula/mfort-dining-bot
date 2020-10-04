@@ -25,4 +25,12 @@ describe('Dining 서비스 테스트', () => {
     service = app.get<DiningService>(DiningService);
   });
 
+  // TODO: Real DB 를 대상으로 테스트를 하고 있기 때문에 인메모리 DB 모듈을 사용하도록 수정하거나, 삭제 필요
+  test('Dining 정보 조회', async () => {
+    await service.getLatestActiveDining();
+  });
+
+  test('Dining participant 수정', async () => {
+    await service.updateParticipant({ user: 'U111111' })
+  });
 });

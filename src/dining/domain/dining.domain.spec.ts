@@ -5,16 +5,15 @@ describe('Dining 도메인 클래스 테스트', () => {
 
   beforeEach(() => {
     dining = new Dining({
-      id: 1,
-      ts: '123.456',
-    }, [
-      { id: 1, name: '하오츠' },
-      { id: 2, name: '하이 카오산' },
-    ], [
-      { user: '1' },
-      { user: '2' },
-      { user: '3' },
-    ]);
+        id: 1,
+        ts: '123.456',
+      },
+      { id: 1, name: '하오츠' }
+      , [
+        { user: '1' },
+        { user: '2' },
+        { user: '3' },
+      ]);
   })
 
   test('새로운 Dining 생성시, 랜덤한 메뉴 선택된다.', () => {

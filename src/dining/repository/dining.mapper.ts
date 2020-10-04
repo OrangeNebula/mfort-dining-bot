@@ -1,13 +1,22 @@
 import { Injectable } from '@nestjs/common';
 import { Dining, Menu } from '../domain/dining.domain';
 
-// TODO: repository 에서 오는 데이터를 객체로 전환하는 책임을 가지고 있음
-// TODO: nest 에서 제공하는 pipes 로 transform 을 하면 될텐데, 좋은 방법이 없을까?
-
 @Injectable()
 export class DiningMapper {
-  /*toDiningObject(): Dining {
-  }*/
+  toDiningObject(diningRow: any, participants: any[]): Dining {
+    return new Dining(
+      { ts: diningRow.ts },
+      {
+        id: diningRow.menuId,
+        name: diningRow.name,
+        imgUrl: diningRow.imgUrl,
+        link: diningRow.link,
+      },
+      participants.map((item) => ({ user: item.user })),
+      diningRow.id,
+      diningRow.orderer ? { user: diningRow.orderer } : null,
+    )
+  }
 
   toMenuObject(rows: any[]): Menu[] {
     return rows.map(item => ({

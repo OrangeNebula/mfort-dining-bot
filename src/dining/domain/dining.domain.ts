@@ -28,8 +28,6 @@ export interface DiningMessage {
 }
 
 export class Dining {
-  public menu: Menu;
-
   public logs: DiningLog[] = [];
 
   public createDate: Date;
@@ -38,11 +36,17 @@ export class Dining {
 
   constructor(
     public readonly message: DiningMessage,
-    menus: Menu[],
+    public menu: Menu,
     public participants: Participant[] = [],
+    public id?: number,
+    public orderer: Participant = null,
   ) {
-    this.menu = menus[Util.rand(0, menus.length)];
     this.createDate = new Date();
+    this.expireDate = Util.add(this.createDate, 30, 'minutes');
+  }
+
+  public static getRandomMenu(menus: Menu[]) {
+    return menus[Util.rand(0, menus.length)];
   }
 
   public isJoin(participant: Participant): boolean {
@@ -70,5 +74,13 @@ export class Dining {
         user: participant.user,
       });
     }
+  }
+
+  public selectOrderer(): Participant | null {
+    if (this.participants.length === 0) {
+      return null;
+    }
+    this.orderer = this.participants[Util.rand(0, this.participants.length)];
+    return this.orderer;
   }
 }

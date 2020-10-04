@@ -13,26 +13,64 @@ export class DiningService {
 
   async createDining() {
     const postMessageResponse = await this.slackService.postMessage(
-      '저녁 드실분?',
       this.getDiningMessageBlocks(),
     );
     const menus = await this.diningRepository.getMenus();
     const dining = new Dining(
       { ts: postMessageResponse.ts as string },
-      menus,
+      Dining.getRandomMenu(menus),
     )
     await this.diningRepository.insertDining(dining);
   }
 
-  getDining() {
-
+  async updateParticipant(participant: Participant): Promise<void> {
+    const dining = await this.getLatestActiveDining();
+    if (!dining) {
+      throw new Error('진행중인 저녁 투표가 없습니다!');
+    }
+    if (dining.isJoin(participant)) {
+      dining.out(participant);
+    } else {
+      dining.join(participant);
+    }
+    await this.diningRepository.updateDining(dining);
+    await this.updateDiningMessage();
+    return;
   }
 
-  updateParticipant() {
-    
+  async updateDiningMessage(): Promise<void> {
+    const dining = await this.getLatestActiveDining();
+    const result = await this.slackService.updateMessage(
+      dining.message.ts,
+      this.getDiningMessageBlocks(dining.participants),
+    );
+    console.log(result);
+    return;
   }
 
-  getDiningMessageBlocks(title= '저녁 드실분?', participants: Participant[] = []) {
+  async selectOrderer(): Promise<void> {
+    const dining = await this.getLatestDoneDining();
+    console.log(dining);
+    if (dining.orderer) {
+      throw new Error('이미 주문할 사람이 정해져있습니다.');
+    }
+    const orderer = dining.selectOrderer();
+    if (!orderer) {
+      throw new Error('오늘은 저녁 멤버가 없습니다.');
+    }
+    await this.diningRepository.updateDining(dining);
+    await this.slackService.postMessage([], `오늘 주문은 <@${orderer.user}> 님이 해주세요!`);
+  }
+
+  getLatestActiveDining(): Promise<Dining | null> {
+    return this.diningRepository.getLatestDining();
+  }
+
+  getLatestDoneDining(): Promise<Dining | null> {
+    return this.diningRepository.getLatestDoneDining();
+  }
+
+  getDiningMessageBlocks(participants: Participant[] = [], title= '저녁 드실분?', ) {
     const mentions = participants.map(item => `<@${item.user}>`).join(',');
     return [{
       type: 'header',

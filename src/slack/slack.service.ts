@@ -7,13 +7,21 @@ export class SlackService {
   private web: WebClient;
 
   constructor(private configService: ConfigService) {
-    console.log('init slack?');
     this.web = new WebClient(configService.getSlackToken());
   }
 
-  public postMessage(text: string, blocks?: (KnownBlock | Block)[]): Promise<WebAPICallResult> {
+  public postMessage(blocks?: (KnownBlock | Block)[], text?: string): Promise<WebAPICallResult> {
     return this.web.chat.postMessage({
       channel: this.configService.getSlackChannel(),
+      text,
+      blocks,
+    });
+  }
+
+  public updateMessage(ts: string, blocks?: (KnownBlock | Block)[], text?: string): Promise<WebAPICallResult> {
+    return this.web.chat.update({
+      channel: this.configService.getSlackChannel(),
+      ts,
       text,
       blocks,
     });
