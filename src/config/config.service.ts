@@ -37,7 +37,8 @@ export class ConfigService extends ConfigManager implements KnexOptionsFactory {
       },
       SLACK_CHANNEL: {
         validate: Joi.string(),
-        require: true,
+        require: false,
+        default: '<PUT_SLACK_CHANNEL_HERE>',
       }
     };
   }
