@@ -17,6 +17,14 @@ export class DiningController {
     return;
   }
 
+  @Post('/participant')
+  async participate(@Param('payload') _payload: string): Promise<void> {
+    const payload = JSON.parse(decodeURIComponent(_payload.replace(/\+/g, ' ')).replace('payload=', ''));
+    const user = payload.user;
+    await this.diningService.updateParticipant({ user });
+    return;
+  }
+
   @Post('/orderer')
   async selectOrderer(): Promise<void> {
     await this.diningService.selectOrderer();
