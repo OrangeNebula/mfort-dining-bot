@@ -1,4 +1,4 @@
-import { Controller, Param, Post, Put } from '@nestjs/common';
+import { Controller, Param, Body, Post, Put } from '@nestjs/common';
 import { DiningService } from './service/dining.service';
 
 @Controller('dining')
@@ -18,10 +18,9 @@ export class DiningController {
   }
 
   @Post('/participant')
-  async participate(@Param('payload') _payload: string): Promise<void> {
-    const payload = JSON.parse(decodeURIComponent(_payload.replace(/\+/g, ' ')).replace('payload=', ''));
-    const user = payload.user;
-    await this.diningService.updateParticipant({ user });
+  async participate(@Body() participateDTO: any): Promise<void> {
+    const payload = JSON.parse(decodeURIComponent(participateDTO.payload.replace(/\+/g, ' ')));
+    await this.diningService.updateParticipant({ user: payload.user.id });
     return;
   }
 
