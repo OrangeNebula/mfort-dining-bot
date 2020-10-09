@@ -24,6 +24,11 @@ export class DiningController {
     return;
   }
 
+  @Put('/expire')
+  async expire(): Promise<void> {
+    await this.diningService.expireDining();
+  }
+
   @Post('/orderer')
   async selectOrderer(): Promise<void> {
     await this.diningService.selectOrderer();

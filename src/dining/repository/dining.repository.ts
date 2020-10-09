@@ -55,7 +55,6 @@ export class DiningRepository {
 
   async getLatestDining(): Promise<Dining | null> {
     const [diningRow] = await this.getDiningQuery()
-      .where('dining.expireAt', '>', Util.toSql(new Date()))
       .limit(1)
     if (!diningRow) {
       return null;
@@ -80,6 +79,7 @@ export class DiningRepository {
       if (dining.orderer) {
         await trx('dining').where('id', dining.id).update({
           orderer: dining.orderer.user,
+          expireAt: dining.expireDate ? Util.toSql(dining.expireDate) : null,
         });
       }
       await trx('participants').where('diningId', dining.id).del();

@@ -32,7 +32,7 @@ export class Dining {
 
   public createDate: Date;
 
-  public expireDate: Date;
+  public expireDate: Date | null;
 
   constructor(
     public readonly message: DiningMessage,
@@ -42,7 +42,7 @@ export class Dining {
     public orderer: Participant = null,
   ) {
     this.createDate = new Date();
-    this.expireDate = Util.add(this.createDate, 30, 'minutes');
+    this.expireDate = null;
   }
 
   public static getRandomMenu(menus: Menu[]) {
@@ -82,5 +82,9 @@ export class Dining {
     }
     this.orderer = this.participants[Util.rand(0, this.participants.length)];
     return this.orderer;
+  }
+
+  public expire(): void {
+    this.expireDate = new Date();
   }
 }
