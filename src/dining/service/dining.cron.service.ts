@@ -12,14 +12,14 @@ export class DiningCronService {
     private repository: DiningRepository,
   ) {}
 
-  @Cron(CronExpression.EVERY_30_SECONDS)
-  handleTest() {
-    // this.service.createDining();
+  @Cron('0 0 17 * * 1-5')
+  async createDining() {
+    await this.service.createDining();
   }
 
-  @Cron('0 0 17 * * 1-5')
-  async handleCron() {
-    // const menus = await this.repository.getMenus();
-    // this.diningService.createDining();
+  @Cron('0 30 17 * * 1-5')
+  async closeDining() {
+    await this.service.expireDining();
+    await this.service.selectOrderer();
   }
 }
