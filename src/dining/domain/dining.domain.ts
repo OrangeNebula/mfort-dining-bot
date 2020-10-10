@@ -40,9 +40,10 @@ export class Dining {
     public participants: Participant[] = [],
     public id?: number,
     public orderer: Participant = null,
+    expireDate: Date = null,
   ) {
     this.createDate = new Date();
-    this.expireDate = null;
+    this.expireDate = expireDate;
   }
 
   public static getRandomMenu(menus: Menu[]) {

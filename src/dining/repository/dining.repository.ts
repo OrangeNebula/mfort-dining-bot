@@ -76,12 +76,10 @@ export class DiningRepository {
 
   async updateDining(dining: Dining): Promise<void> {
     await this.knex.transaction(async trx => {
-      if (dining.orderer) {
-        await trx('dining').where('id', dining.id).update({
-          orderer: dining.orderer.user,
-          expireAt: dining.expireDate ? Util.toSql(dining.expireDate) : null,
-        });
-      }
+      await trx('dining').where('id', dining.id).update({
+        orderer: dining.orderer ? dining.orderer.user : null,
+        expireAt: dining.expireDate ? Util.toSql(dining.expireDate) : null,
+      });
       await trx('participants').where('diningId', dining.id).del();
       await trx('participants').insert(dining.participants.map(item => ({
         diningId: dining.id,

@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DiningRepository } from '../repository/dining.repository';
 import { Dining, Menu, Participant } from '../domain/dining.domain';
 import { SlackService } from '../../slack/slack.service';
+import { Block, KnownBlock } from '@slack/web-api';
 
 interface DiningMessageOptions {
   title?: string,
@@ -79,14 +80,28 @@ export class DiningService {
       throw new Error('오늘은 저녁 멤버가 없습니다.');
     }
     await this.diningRepository.updateDining(dining);
-    await this.slackService.postMessage(this.getOrdererMessage(orderer, {
-      menu: dining.menu,
-    }));
+    // Note.
+    //  Slack 레벨에서 Downloadable 하지 않응 이미지 링크일 경우, API 호출 자체가 실패한다.
+    //  이런 경우를 방지하기 위해, 실패 가능성이 없는 Payload 로 다시 한번 API 를 호출한다.
+    try {
+      await this.slackService.postMessage(this.getOrdererMessage(orderer, {
+        menu: dining.menu,
+      }));
+    } catch (err) {
+      Logger.error(err);
+      await this.slackService.postMessage(this.getOrdererMessage(orderer, {
+        menu: {
+          id: dining.menu.id,
+          name: dining.menu.name,
+        }
+      }));
+      throw err;
+    }
   }
 
   getDiningMessageBlocks(
     participants: Participant[] = [],
-    options?: DiningMessageOptions,
+    options: DiningMessageOptions = {},
   ) {
     const title = options.title || '저녁 신청받습니다!'
     const expireTime = options.expireTime || '17:30';
@@ -143,30 +158,37 @@ export class DiningService {
     options?: OrdererMessageOptions,
   ) {
     const textMenuSuggestion = options?.menu?.name ? `\n 메뉴는 ${options.menu.name} 어때요? :smile:` : '';
-    let orderButtonBlock = null;
-    if (options.menu.link) {
-      orderButtonBlock = {
+    const blocks: (KnownBlock | Block)[] = [
+      {
         type: 'section',
-          text: {
-        type: 'mrkdwn',
-          text: '빠르게 주문하려면 오른쪽 버튼을 클릭해주세요!'
+        text: {
+          type: 'mrkdwn',
+          text: `오늘 저녁은 <@${orderer.user}> 주문해주시겠어요? :pray: ${textMenuSuggestion}`
+        }
       },
+    ]
+    if (options.menu.link) {
+      blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: '빠르게 주문하려면 모바일에서 버튼을 클릭해주세요!'
+        },
         accessory: {
           type: 'button',
-            text: {
+          text: {
             type: 'plain_text',
-              text: '주문하기',
-              emoji: true
+            text: '주문하기',
+            emoji: true
           },
           value: 'menu',
-            url: options.menu.link,
-            action_id: 'button-action'
+          url: options.menu.link,
+          action_id: 'button-action'
         }
-      };
+      });
     }
-    let menuImageBlock = null;
     if (options.menu.imgUrl) {
-      menuImageBlock = {
+      blocks.push({
         type: 'image',
         title: {
           type: 'plain_text',
@@ -175,18 +197,8 @@ export class DiningService {
         },
         image_url: options.menu.imgUrl,
         alt_text: 'marg'
-      };
+      });
     }
-    return [
-      {
-        type: 'section',
-        text: {
-          type: 'mrkdwn',
-          text: `오늘 저녁은 <@${orderer.user}> 주문해주시겠어요? :pray: ${textMenuSuggestion}`
-        }
-      },
-      (orderButtonBlock && orderButtonBlock),
-      (menuImageBlock && menuImageBlock),
-    ];
+    return blocks;
   }
 }

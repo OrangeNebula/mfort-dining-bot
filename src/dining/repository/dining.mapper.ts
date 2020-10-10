@@ -15,6 +15,7 @@ export class DiningMapper {
       participants.map((item) => ({ user: item.user })),
       diningRow.id,
       diningRow.orderer ? { user: diningRow.orderer } : null,
+      diningRow.expireAt,
     )
   }
 
