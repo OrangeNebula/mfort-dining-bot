@@ -70,6 +70,10 @@ export class DiningService {
     )
   }
 
+  async remindDining(): Promise<void> {
+    await this.slackService.postMessage(this.getRemindMessage());
+  }
+
   async selectOrderer(): Promise<void> {
     const dining = await this.diningRepository.getLatestDoneDining();
     if (dining.orderer) {
@@ -172,19 +176,8 @@ export class DiningService {
         type: 'section',
         text: {
           type: 'mrkdwn',
-          text: '빠르게 주문하려면 모바일에서 버튼을 클릭해주세요!'
+          text: `빠르게 주문하려면 모바일에서 링크를 클릭해주세요! ${options.menu.link}`,
         },
-        accessory: {
-          type: 'button',
-          text: {
-            type: 'plain_text',
-            text: '주문하기',
-            emoji: true
-          },
-          value: 'menu',
-          url: options.menu.link,
-          action_id: 'button-action'
-        }
       });
     }
     if (options.menu.imgUrl) {
@@ -200,5 +193,17 @@ export class DiningService {
       });
     }
     return blocks;
+  }
+
+  getRemindMessage() {
+    return [
+      {
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: `저녁 주문 마감 5분전입니다! 아직 신청하지 않으신 분은 신청해주세요~`
+        }
+      },
+    ]
   }
 }
