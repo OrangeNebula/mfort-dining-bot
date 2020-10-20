@@ -12,7 +12,7 @@ export class DiningCronService {
     private repository: DiningRepository,
   ) {}
 
-  @Cron('0 0 17 * * 1-5')
+  @Cron('0 0 15 * * 1-5')
   async createDining() {
     await this.service.createDining();
   }
