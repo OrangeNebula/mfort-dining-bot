@@ -17,12 +17,12 @@ export class DiningCronService {
     await this.service.createDining();
   }
 
-  @Cron('0 25 17 * * 1-5')
+  @Cron('0 55 17 * * 1-5')
   async remindDining() {
     await this.service.remindDining();
   }
 
-  @Cron('0 30 17 * * 1-5')
+  @Cron('0 0 18 * * 1-5')
   async closeDining() {
     await this.service.expireDining();
     await this.service.selectOrderer();
